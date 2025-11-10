@@ -12,6 +12,24 @@ use crate::constant::{API_ROOT_URL, BTC_TICKER, USER_AGENT_NAME};
 use crate::error::Error;
 use crate::response::Balance;
 
+enum Api {
+    Balances,
+}
+
+impl Api {
+    fn url_path(&self) -> &str {
+        match self {
+            Self::Balances => "balances",
+        }
+    }
+
+    fn http_method(&self) -> Method {
+        match self {
+            Self::Balances => Method::GET,
+        }
+    }
+}
+
 /// Strike client
 #[derive(Debug, Clone)]
 pub struct StrikeClient {
@@ -36,10 +54,13 @@ impl StrikeClient {
         })
     }
 
-    async fn call_api<T>(&self, method: Method, url: Url) -> Result<T, Error>
+    async fn call_api<T>(&self, api: Api) -> Result<T, Error>
     where
         T: DeserializeOwned,
     {
+        let url: Url = self.root_url.join(api.url_path())?;
+        let method: Method = api.http_method();
+
         // Build headers
         let mut headers: HeaderMap = HeaderMap::with_capacity(2);
         headers.insert(ACCEPT, HeaderValue::from_static("application/json"));
@@ -72,10 +93,8 @@ impl StrikeClient {
 
     /// Get **bitcoin** balance.
     pub async fn balance(&self) -> Result<Balance, Error> {
-        let url: Url = self.root_url.join("balances")?;
-
         // Get balances
-        let balances: Vec<Balance> = self.call_api(Method::GET, url).await?;
+        let balances: Vec<Balance> = self.call_api(Api::Balances).await?;
 
         // Find balance for BTC
         let balance: Balance = balances
