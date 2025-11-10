@@ -10,4 +10,5 @@ pub use ::url::*;
 pub use crate::auth::*;
 pub use crate::client::*;
 pub use crate::error::*;
+pub use crate::response::*;
 pub use crate::*;

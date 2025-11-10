@@ -8,8 +8,9 @@ use serde::de::DeserializeOwned;
 use url::Url;
 
 use crate::auth::StrikeAuth;
-use crate::constant::{API_ROOT_URL, USER_AGENT_NAME};
+use crate::constant::{API_ROOT_URL, BTC_TICKER, USER_AGENT_NAME};
 use crate::error::Error;
+use crate::response::Balance;
 
 /// Strike client
 #[derive(Debug, Clone)]
@@ -70,11 +71,18 @@ impl StrikeClient {
     }
 
     /// Get **bitcoin** balance.
-    pub async fn balance(&self) -> Result<f64, Error> {
+    pub async fn balance(&self) -> Result<Balance, Error> {
         let url: Url = self.root_url.join("balances")?;
 
-        let _balances: () = self.call_api(Method::GET, url).await?;
+        // Get balances
+        let balances: Vec<Balance> = self.call_api(Method::GET, url).await?;
 
-        todo!()
+        // Find balance for BTC
+        let balance: Balance = balances
+            .into_iter()
+            .find(|b| b.currency == BTC_TICKER)
+            .unwrap_or_else(|| Balance::new(BTC_TICKER));
+
+        Ok(balance)
     }
 }
