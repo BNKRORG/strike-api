@@ -17,7 +17,7 @@ impl fmt::Debug for StrikeAuth {
 
 impl StrikeAuth {
     /// Construct API key credential
-    pub fn api_keys<K>(key: K) -> Self
+    pub fn api_key<K>(key: K) -> Self
     where
         K: Into<String>,
     {
