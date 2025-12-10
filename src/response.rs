@@ -94,6 +94,40 @@ pub struct Deposit {
     pub failure_reason: Option<String>,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct Invoices {
+    pub items: Vec<Invoice>,
+}
+
+/// State of an invoice
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum InvoiceState {
+    /// The invoice has not been paid yet
+    Unpaid,
+    /// Invoice is being processed
+    Pending,
+    /// Invoice has been paid
+    Paid,
+    /// Invoice has been canceled
+    Cancelled,
+}
+
+/// Strike invoice
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Invoice {
+    /// The ID of the invoice
+    pub invoice_id: String,
+    /// The invoice acount
+    pub amount: StrikeAmount,
+    /// The status of the invoice
+    pub state: InvoiceState,
+    /// Timestamp when the invoice was created
+    pub created: String,
+}
+
 fn deserialize_string_to_f64<'de, D>(deserializer: D) -> Result<f64, D::Error>
 where
     D: Deserializer<'de>,
