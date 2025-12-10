@@ -10,22 +10,25 @@ use url::Url;
 use crate::auth::StrikeAuth;
 use crate::constant::{API_ROOT_URL, BTC_TICKER, USER_AGENT_NAME};
 use crate::error::Error;
-use crate::response::Balance;
+use crate::response::{Balance, Deposit, Deposits};
 
 enum Api {
     Balances,
+    Deposits,
 }
 
 impl Api {
     fn url_path(&self) -> &str {
         match self {
             Self::Balances => "/v1/balances",
+            Self::Deposits => "/v1/deposits",
         }
     }
 
     fn http_method(&self) -> Method {
         match self {
             Self::Balances => Method::GET,
+            Self::Deposits => Method::GET,
         }
     }
 }
@@ -103,5 +106,20 @@ impl StrikeClient {
             .unwrap_or_else(|| Balance::new(BTC_TICKER));
 
         Ok(balance)
+    }
+
+    /// Get **bitcoin** deposits.
+    pub async fn deposits(&self) -> Result<Vec<Deposit>, Error> {
+        // Get deposits
+        let deposits: Deposits = self.call_api(Api::Deposits).await?;
+
+        // Filter bitcoin deposits
+        let deposits: Vec<Deposit> = deposits
+            .items
+            .into_iter()
+            .filter(|b| b.amount.currency == BTC_TICKER)
+            .collect();
+
+        Ok(deposits)
     }
 }

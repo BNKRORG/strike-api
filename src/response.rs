@@ -44,6 +44,59 @@ impl Balance {
     }
 }
 
+/// Strike amount
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct StrikeAmount {
+    /// Amount
+    #[serde(deserialize_with = "deserialize_string_to_f64")]
+    pub amount: f64,
+    /// Currency
+    pub currency: String,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct Deposits {
+    pub items: Vec<Deposit>,
+}
+
+/// State of a deposit
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum DepositState {
+    /// New deposit
+    New,
+    /// Deposit is being processed
+    Pending,
+    /// Deposit has been processed
+    Completed,
+    /// Deposit has been reversed
+    Reversed,
+    /// Deposit failed
+    Failed,
+    /// Fallback for unknown states
+    #[serde(other)]
+    Unknown,
+}
+
+/// Strike deposit
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Deposit {
+    /// The ID of the deposit
+    pub id: String,
+    /// The amount to be credited to the Strike account.
+    pub amount: StrikeAmount,
+    /// The amount to be charged as the fee for the deposit.
+    pub fee: StrikeAmount,
+    /// The total amount to be deposited from the payment method.
+    pub total_amount: StrikeAmount,
+    /// The status of the deposit (e.g. "COMPLETED", "PENDING", "FAILED")
+    pub state: DepositState,
+    /// The reason for the deposit failure.
+    pub failure_reason: Option<String>,
+}
+
 fn deserialize_string_to_f64<'de, D>(deserializer: D) -> Result<f64, D::Error>
 where
     D: Deserializer<'de>,
