@@ -74,9 +74,6 @@ pub enum DepositState {
     Reversed,
     /// Deposit failed
     Failed,
-    /// Fallback for unknown states
-    #[serde(other)]
-    Unknown,
 }
 
 /// Strike deposit
