@@ -19,7 +19,7 @@ enum Api {
 impl Api {
     fn url_path(&self) -> &str {
         match self {
-            Self::Balances => "balances",
+            Self::Balances => "/v1/balances",
         }
     }
 
